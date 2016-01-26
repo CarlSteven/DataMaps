@@ -265,12 +265,12 @@ var makeObj = function (keys) {
 
 var batchLiveDataUpsert = Meteor.bindEnvironment(function (parsedLines, path) {
     //find the site information
-    var pathArray = path.split('/');
+    //var pathArray = path.toString().replace(/\\/g, "/").split('/');
+    var pathArray = path.toString().split(Meteor.require('path').sep);
     var parentDir = pathArray[pathArray.length - 2];
     var site = Monitors.find({
         incoming: parentDir
     }).fetch()[0];
-
     if (site.AQSID) {
         var allObjects = [];
         for (var k = 0; k < parsedLines.length; k++) {
