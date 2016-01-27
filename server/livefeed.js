@@ -1,6 +1,7 @@
 //required packages
 var csvmodule = Meteor.npmRequire('csv');
 var fs = Meteor.npmRequire('fs');
+var pathModule = Meteor.npmRequire('path');
 
 var perform5minAggregat = function (siteId, startEpoch, endEpoch) {
 
@@ -40,7 +41,7 @@ var perform5minAggregat = function (siteId, startEpoch, endEpoch) {
                 }
             }
         }
-     ];
+    ];
 
     LiveData.aggregate(pipeline,
         Meteor.bindEnvironment(
@@ -122,7 +123,7 @@ var perform5minAggregat = function (siteId, startEpoch, endEpoch) {
                                 }
 
                                 logger.info('numvalid: ', numValid, 'j: ', j);
-                                
+
                                 if ((aggrSubTypes[newkey].numValid / j) < 0.75) {
                                     aggrSubTypes[newkey].Flag = 0; //should discuss how to use
                                 }
@@ -242,7 +243,7 @@ var makeObj = function (keys) {
                     obj.subTypes[metron] = [{
                         metric: metric,
                         val: val
-                }];
+                    }];
                 } else {
                     if (metric === 'Flag') { //Flag should be always first
                         obj.subTypes[metron].unshift({
@@ -259,18 +260,14 @@ var makeObj = function (keys) {
             }
         }
     }
-
     return obj;
 };
 
-var batchLiveDataUpsert = Meteor.bindEnvironment(function (parsedLines, path) {
+batchLiveDataUpsert = Meteor.bindEnvironment(function (parsedLines, path) {
     //find the site information
-    //var pathArray = path.toString().replace(/\\/g, "/").split('/');
-    var pathArray = path.toString().split(Meteor.require('path').sep);
+    var pathArray = path.toString().split(pathModule.sep);
     var parentDir = pathArray[pathArray.length - 2];
-    var site = Monitors.find({
-        incoming: parentDir
-    }).fetch()[0];
+    var site = Monitors.find({incoming: parentDir}).fetch()[0];
     if (site.AQSID) {
         var allObjects = [];
         for (var k = 0; k < parsedLines.length; k++) {
@@ -300,7 +297,6 @@ var batchLiveDataUpsert = Meteor.bindEnvironment(function (parsedLines, path) {
         });
     }
 });
-
 
 var readFile = Meteor.bindEnvironment(function (path) {
 
@@ -338,7 +334,6 @@ Meteor.methods({
         AggrData.update({
             _id: id
         }, qry);
-
 
     }
 });
