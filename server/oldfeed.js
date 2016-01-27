@@ -29,7 +29,6 @@ oldWatcher
         logger.info('Ready for changes in /hnet/better/2015/.');
     });
 
-
 var readOldFile = Meteor.bindEnvironment(function (path) {
     fs.readFile(path, 'utf-8', function (err, output) {
         csvmodule.parse(output, {
@@ -39,12 +38,15 @@ var readOldFile = Meteor.bindEnvironment(function (path) {
             if (err) {
                 logger.error(err);
             }
-            parsedLines.forEach(function(parsedLine){
-                for(var key in parsedLine) {
-                    if(parsedLine.hasOwnProperty(key) && key.toString() != "TheTime") {
-                        parsedLine["HNET_MT_" + key.replace("mt_", "")] = parsedLine[key];
+            parsedLines.forEach(function (parsedLine) {
+                for (var key in parsedLine) {
+                    if (parsedLine.hasOwnProperty(key) && key.toString() != "TheTime" && key.toString() != "TIMESTAMP") {
+                        parsedLine["HNET_AA_" + key.replace(/mt_|jf_/, "").replace("1min_", "")] = parsedLine[key];
                         delete parsedLine[key];
+                    } else if (key.toString() == "TIMESTAMP") {
+                        //Need to handle timestamp -> TheTime conversion for one minute data
                     }
+
                 }
             });
             batchLiveDataUpsert(parsedLines, path);
