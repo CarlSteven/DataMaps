@@ -31,6 +31,17 @@ oldWatcher
 
 var readOldFile = Meteor.bindEnvironment(function (path) {
     fs.readFile(path, 'utf-8', function (err, output) {
+        if (path.indexOf("1min") > -1) {
+            var outputArr = output.split('\n');
+            delete outputArr[0];
+            delete outputArr[2];
+            delete outputArr[3];
+            var outTemp = "";
+            outputArr.forEach(function (outLine) {
+                outTemp += outLine + "\n";
+            });
+            output = outTemp;
+        }
         csvmodule.parse(output, {
             auto_parse: true,
             columns: true
@@ -41,10 +52,12 @@ var readOldFile = Meteor.bindEnvironment(function (path) {
             parsedLines.forEach(function (parsedLine) {
                 for (var key in parsedLine) {
                     if (parsedLine.hasOwnProperty(key) && key.toString() != "TheTime" && key.toString() != "TIMESTAMP") {
-                        parsedLine["HNET_AA_" + key.replace(/mt_|jf_/, "").replace("1min_", "")] = parsedLine[key];
+                        parsedLine["HNET_AA_" + key.replace(/mt_|jf_/i, "").replace("1min_", "")] = parsedLine[key];
                         delete parsedLine[key];
                     } else if (key.toString() == "TIMESTAMP") {
                         //Need to handle timestamp -> TheTime conversion for one minute data
+                        // NOT CORRECT YET - TODO!!
+                        parsedLine["TheTime"] = ((((new Date(parsedLine["TIMESTAMP"]).valueOf() + 25569) / 8640) - 6) / 3600);
                     }
 
                 }
