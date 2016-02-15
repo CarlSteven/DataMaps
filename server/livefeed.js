@@ -263,7 +263,7 @@ var makeObj = function (keys) {
     return obj;
 };
 
-batchLiveDataUpsert = Meteor.bindEnvironment(function (parsedLines, path) {
+var batchLiveDataUpsert = Meteor.bindEnvironment(function (parsedLines, path) {
     //find the site information
     var pathArray = path.toString().split(pathModule.sep);
     var parentDir = pathArray[pathArray.length - 2];
